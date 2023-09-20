@@ -161,7 +161,7 @@ void Draw()
 	{
 		Play::DrawObjectRotated(Play::GetGameObject(j));
 		GameObject& obj_gem = Play::GetGameObject(j);
-		Play::DrawCircle({ obj_gem.pos }, 10, Play::cGreen);
+		//Play::DrawCircle({ obj_gem.pos }, 10, Play::cGreen);
 	}
 
 	for (int m : Play::CollectGameObjectIDsByType(TYPE_METEOR))
@@ -169,7 +169,7 @@ void Draw()
 		Play::DrawObjectRotated(Play::GetGameObject(m)); 
 		GameObject& obj_meteor = Play::GetGameObject(m); 
 		WrapObject(obj_meteor);   
-		Play::DrawCircle({ obj_meteor.pos }, 30, Play::cGreen); 
+		//Play::DrawCircle({ obj_meteor.pos }, 30, Play::cGreen); 
 	}
 
 	for (int i : Play::CollectGameObjectIDsByType(TYPE_ASTEROID))
@@ -177,13 +177,13 @@ void Draw()
 		Play::DrawObjectRotated(Play::GetGameObject(i));
 		GameObject& obj_asteroid = Play::GetGameObject(i);
 		WrapObject(obj_asteroid);
-		Play::DrawCircle({ obj_asteroid.pos }, 30, Play::cGreen);
+		//Play::DrawCircle({ obj_asteroid.pos }, 30, Play::cGreen);
 	}
 
 	Play::DrawObjectRotated(Play::GetGameObjectByType(TYPE_AGENT));
 	GameObject& obj_agent{ Play::GetGameObjectByType(TYPE_AGENT) };
 	WrapObject(obj_agent); 
-	Play::DrawCircle({ obj_agent.pos }, 10, Play::cGreen);
+	//Play::DrawCircle({ obj_agent.pos }, 10, Play::cGreen);
 
 	Play::DrawFontText("64px", "Level: " + std::to_string(gamestate.level), Point2D(DISPLAY_WIDTH - 200, 50), Play::CENTRE);
 	Play::DrawFontText("64px", "Score: " + std::to_string(gamestate.score), Point2D(DISPLAY_WIDTH / 2, 50), Play::CENTRE);
@@ -275,8 +275,10 @@ void UpdateAgent( )
 		break; 
 	
 	case STATE_WIN:
-		Play::SetSprite(obj_agent, "agent8_left", 0.f); 
-		Play::DrawFontText("64px", "YOU WIN!!", { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT - 300 }, Play::CENTRE);
+		Play::SetSprite(obj_agent, "saucer", 0.f);
+		obj_agent.rotation = 0.3f; 
+		obj_agent.velocity = { 5, -1 }; 
+		Play::DrawFontText("64px", "JACKPOT !!", { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT - 300 }, Play::CENTRE);
 		Play::PresentDrawingBuffer();
 		break; 
 	}
