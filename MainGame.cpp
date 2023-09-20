@@ -497,3 +497,9 @@ void FloatDirectionObject(GameObject& obj, float speed)
 	obj.velocity.x = x * speed;
 	obj.velocity.y = -y * speed;
 }
+
+
+void test()
+{
+	
+}
