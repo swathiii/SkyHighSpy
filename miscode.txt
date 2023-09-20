@@ -1,0 +1,282 @@
+	
+	--------- LOOP CODE --------------
+	
+	//obj_meteor.pos.y = obj_meteor.oldPos.y + 1; 
+
+		/*		if (obj_meteor.pos.x = 1280)
+		{
+
+			obj_meteor.pos = { 0, obj_meteor.oldPos.y };
+
+		}
+		if (obj_meteor.pos.y = 0)
+		{
+			obj_meteor.pos = { obj_meteor.oldPos.x, 720 };
+
+		}*/ 
+		//obj_meteor.velocity = METEOR_VELOCITY_DEFAULT; 
+
+
+
+		--------------------------------------------
+
+			if (Play::IsLeavingDisplayArea(obj_meteor, Play::HORIZONTAL)) 
+	{
+		obj_meteor.pos.x = obj_meteor.oldPos.x; 
+		if (obj_meteor.pos.x <= 0 && obj_meteor.pos.y <= 0)
+		{
+
+			obj_meteor.pos = { 1000, 650 };
+
+		}
+
+	}
+
+
+
+
+
+	//creating a function: 
+	void FloatDirectionObject(GameObject& obj, float speed)
+{
+	float x = sin(obj.rotation);
+	float y = cos(obj.rotation);
+
+	obj.velocity.x = x * speed;
+	obj.velocity.y = -y * speed;
+}
+
+
+FloatDirectionObject(obj_agent, AGENT_SPEED); // The function that makes it go in the direction its pointing 
+
+
+void WrapObject(GameObject& obj)
+{
+	obj.pos.x = fmod(obj.pos.x, DISPLAY_WIDTH); 
+ 
+	if (obj.pos.y < 0)
+	{
+		obj.pos.x = obj.oldPos.x; 
+		obj.pos.y = DISPLAY_HEIGHT; 
+	} 
+
+	obj.pos += obj.velocity;
+}
+
+	obj_meteor.pos.x = fmod(obj_meteor.pos.x, DISPLAY_WIDTH); 
+ 
+	if (obj_meteor.pos.y < 0)
+	{
+		obj_meteor.pos.x = obj_meteor.oldPos.x; 
+		obj_meteor.pos.y = DISPLAY_HEIGHT; 
+	} 
+
+	obj_meteor.pos += obj_meteor.velocity;
+
+
+
+
+	void UpdateAsteroid()
+{
+    for (int i : Play::CollectGameObjectIDsByType(TYPE_ASTEROID))
+    {
+        GameObject& obj_asteroid = Play::GetGameObject(i);
+
+        // Calculate the rotation angle based on the velocity vector
+        float rotation = atan2(-obj_asteroid.velocity.y, obj_asteroid.velocity.x);
+
+        // Convert radians to degrees
+        rotation = rotation * 180.0f / M_PI;
+
+        // Set the rotation
+        obj_asteroid.rotation = rotation;
+
+        WrapObject(obj_asteroid);
+
+        Play::UpdateGameObject(obj_asteroid);
+    }
+}
+
+void UpdateMeteor()
+{
+    GameObject& obj_meteor = Play::GetGameObjectByType(TYPE_METEOR);
+
+    FloatDirectionObject(obj_meteor, METEOR_SPEED);
+
+    obj_meteor.velocity = METEOR_VELOCITY_DEFAULT;
+
+    // Calculate the rotation angle based on the velocity vector
+    float rotation = atan2(-obj_meteor.velocity.y, obj_meteor.velocity.x);
+
+    // Convert radians to degrees
+    rotation = rotation * 180.0f / M_PI;
+
+    // Set the rotation
+    obj_meteor.rotation = rotation;
+
+    WrapObject(obj_meteor);
+
+    Play::UpdateGameObject(obj_meteor);
+}
+
+
+
+
+void UpdateControls()
+{
+	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT);
+	//Play::CentreSpriteOrigin("agent8_left_7"); 
+
+	FloatDirectionObject(obj_agent, AGENT_SPEED); // The function that makes it go in the direction its pointing 
+
+	if (Play::KeyDown(VK_LEFT))
+	{
+		obj_agent.rotation -= 0.1f;
+		Play::SetSprite(obj_agent, "agent8_left", 0.05f); 
+	}
+	if (Play::KeyDown(VK_RIGHT))
+	{
+		obj_agent.rotation += 0.1f;
+		Play::SetSprite(obj_agent, "agent8_right", 0.05f); 
+	}
+	if (Play::KeyDown(VK_UP))
+	{
+		AGENT_SPEED += 0.3f;
+	}
+	if (Play::KeyDown(VK_DOWN))
+	{
+		AGENT_SPEED *= 0.9f;
+	}
+	
+	Play::UpdateGameObject(obj_agent); 
+	//Play::DrawObjectRotated(obj_agent); 
+}
+
+
+
+
+void UpdateMeteor()
+{
+	GameObject& obj_meteor = Play::GetGameObjectByType(TYPE_METEOR);
+	Play::SetSprite(obj_meteor, "meteor_2", 0.05f); //sprite, .png, anim speed  
+
+	FloatDirectionObject(obj_meteor, METEOR_SPEED);
+
+	//obj_meteor.velocity = METEOR_VELOCITY_DEFAULT;
+
+	obj_asteroid.rotation = 0.5f;
+
+	obj_meteor.pos += obj_meteor.velocity; 
+
+	WrapObject(obj_meteor);  
+
+	Play::UpdateGameObject(obj_meteor);
+
+	//Play::DrawObjectRotated(obj_meteor); 
+} 
+
+
+	for (int j = 1; j < gamestate.objectcount ; j++)  
+	{
+		Play::CreateGameObject(TYPE_GEM, { Play::RandomRollRange(0, 1280), Play::RandomRollRange(0, 720) }, AGENT_RADIUS, "gem"); 
+		Play::CentreSpriteOrigin("gem");  
+		GameObject& obj_gem = Play::GetGameObject(j);  
+		Play::DrawCircle(obj_gem.pos, 40, Play::cWhite); 
+
+	}
+
+
+
+void Collision()
+{
+	bool liftoff = false; 
+	//agent - asteroid collision
+	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT); 
+
+	for (int i : Play::CollectGameObjectIDsByType(TYPE_ASTEROID))
+	{
+
+		GameObject& obj_asteroid = Play::GetGameObject(i);
+		if (Play::IsColliding(obj_agent, obj_asteroid) )  
+			{
+				obj_agent.pos = obj_asteroid.pos;
+				//obj_agent.rotation += Play::DegToRad(180);  
+
+				gamestate.collision += 1 ; 
+
+				Play::SetSprite(obj_agent, "agent8_left_7", 0.1); 
+				//FloatDirectionObject(obj_agent, AGENT_SPEED); 
+
+				if (Play::KeyDown(VK_SPACE))
+				{
+					gamestate.lift_off += 1; 
+					liftoff = true;
+		
+
+					int gem_id = Play::CreateGameObject(TYPE_GEM, obj_asteroid.pos, AGENT_RADIUS, "gem");
+					GameObject& obj_gem = Play::GetGameObject(gem_id);    
+					obj_gem.pos = obj_asteroid.pos;
+					gamestate.gemcreated += 1;
+
+					Play::DestroyGameObject(i); 
+
+					obj_agent.pos += obj_agent.velocity; 
+					obj_agent.velocity.y *= -1;
+					obj_agent.pos += obj_agent.velocity; 
+					 
+					 
+				} 
+				
+				Play::UpdateGameObject(obj_agent); 
+				
+		} 
+	}
+}
+
+
+
+
+void WrapObject(GameObject& obj)
+{
+	obj.pos.x = fmod(obj.pos.x, DISPLAY_WIDTH);
+	//obj.pos.y = fmod(obj.pos.y, DISPLAY_HEIGHT); 
+
+	if (obj.pos.y < 0)
+	{
+		obj.pos.x = obj.oldPos.x;
+		obj.pos.y = DISPLAY_HEIGHT;
+	}
+
+	obj.pos += obj.velocity; 
+} 
+
+
+
+	for (int i = 1; i < gamestate.objectcount ; i++) 
+	{
+			Play::CreateGameObject(TYPE_ASTEROID, { Play::RandomRollRange(0, 1280), Play::RandomRollRange(0, 720) }, AGENT_RADIUS, "asteroid_2"); //random pos  v 
+			Play::CentreSpriteOrigin("asteroid_2");  
+			GameObject& obj_asteroid = Play::GetGameObject(i);
+			Play::DrawCircle(obj_asteroid.pos, 40, Play::cGreen);
+			//obj_asteroid.rotation = Randomize(630, 0.01); 
+			//RandomRotation(obj_asteroid); 
+
+	}
+
+
+
+
+				GameObject& asteroid_wrap = Play::GetGameObject(i); 
+			WrapObject(asteroid_wrap);
+			
+
+
+				for (int i = 1; i < gamestate.objectcount ; i++) 
+	{
+			int ast_id = Play::CreateGameObject(TYPE_ASTEROID, { Play::RandomRollRange(0, 1280), Play::RandomRollRange(0, 720) }, AGENT_RADIUS, "asteroid_2"); //random pos  v 
+			Play::CentreSpriteOrigin("asteroid_2");  
+			GameObject& asteroid_obj = Play::GetGameObject(ast_id);
+			asteroid_obj.rotation = Randomize(630, 0.02); 
+
+
+	}
