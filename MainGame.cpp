@@ -32,6 +32,7 @@ struct GameState
 	int collision = 0;
 	int deaths = 0; 
 	bool agent_dead = false; 
+	bool agent_won = false; 
 	float asteroid_rotation = 0;
 	float lift_off = 0;
 	int gemcreated = 0;
@@ -257,6 +258,10 @@ void UpdateAgent( )
 
 	case STATE_PLAY:
 		UpdateControls();
+		if (gamestate.agent_won)
+		{
+			gamestate.agentstate = STATE_WIN;
+		}
 		if (gamestate.agent_dead)
 		{
 			gamestate.agentstate = STATE_DEAD; 
@@ -268,7 +273,12 @@ void UpdateAgent( )
 		Play::DrawFontText("64px", "GAME OVER", { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT - 300 }, Play::CENTRE);
 		Play::PresentDrawingBuffer();
 		break; 
-
+	
+	case STATE_WIN:
+		Play::SetSprite(obj_agent, "agent8_left", 0.f); 
+		Play::DrawFontText("64px", "YOU WIN!!", { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT - 300 }, Play::CENTRE);
+		Play::PresentDrawingBuffer();
+		break; 
 	}
 
 	if (gamestate.agent_dead)   
@@ -320,6 +330,11 @@ void UpdateAsteroid()
 			
 			FloatDirectionObject(obj_asteroid, METEOR_SPEED);  
 			obj_asteroid.pos += obj_asteroid.velocity; 
+			if (gamestate.agent_won)
+			{
+				gamestate.agentstate = STATE_WIN; 
+			}
+
 			if (gamestate.agent_dead)
 			{
 				gamestate.agentstate = STATE_DEAD; 
@@ -329,11 +344,14 @@ void UpdateAsteroid()
 		case STATE_DEAD:
 			Play::DestroyGameObject(i); 
 			break; 
+
+		case STATE_WIN:
+			Play::DestroyGameObject(i);
+			break;
 		}
 
-		Play::SetSprite(obj_asteroid, "asteroid_2", 0.05f); //sprite, .png, anim speed      
 
-		//obj_asteroid.pos += obj_asteroid.velocity; 
+		Play::SetSprite(obj_asteroid, "asteroid_2", 0.05f); //sprite, .png, anim speed      
 
 		Play::UpdateGameObject(obj_asteroid);
 
@@ -348,9 +366,38 @@ void UpdateMeteor()
 
 		Play::SetSprite(obj_meteor, "meteor_2", 0.05f); //sprite, .png, anim speed   
 
-		FloatDirectionObject(obj_meteor, METEOR_SPEED); 
+		switch (gamestate.agentstate)
+		{
+		case STATE_APPEAR:
+			obj_meteor.velocity = { 0,0 };
+			Play::SetSprite(obj_meteor, "meteor_2", 0.05f); 
+			if (Play::KeyDown(VK_RETURN))
+			{
+				gamestate.agentstate = STATE_PLAY;
+			}
+			break; 
 
-		obj_meteor.pos += obj_meteor.velocity; 
+		case STATE_PLAY:
+			FloatDirectionObject(obj_meteor, METEOR_SPEED);  
+			obj_meteor.pos += obj_meteor.velocity;  
+			if (gamestate.agent_won) 
+			{
+				gamestate.agentstate = STATE_WIN;
+			}
+			if (gamestate.agent_dead)
+			{
+				gamestate.agentstate = STATE_DEAD;
+			}
+			break;
+		
+		case STATE_DEAD:
+			Play::DestroyGameObject(m);  
+			break;
+
+		case STATE_WIN:  
+			Play::DestroyGameObject(m);   
+			break;
+		}
 
 		Play::UpdateGameObject(obj_meteor);
 	}
@@ -411,16 +458,25 @@ void gemcollision()
 		bool gemcollision = false; 
 		if (Play::IsColliding(obj_gem, obj_agent))
 		{
-			gamestate.score += 10;
+			gamestate.score += 1000;
+
+			gamestate.gemsleft -= 1; 
+
 			gemcollision = true; 
 			
 		}
 
 		if (gemcollision)
 		{
-			//Play::SetSprite(obj_agent, "blue_ring", 0.01);  
+			//Play::SetSprite(obj_agent, "blue_ring", 0.01); 
+
 			Play::DestroyGameObject(j);  
-			gamestate.gemsleft -= 1; 
+			//gamestate.gemsleft -= 1; 
+
+			if (gamestate.gemsleft < 1)
+			{
+				gamestate.agent_won = true; 
+			}
 		}
 
 		Play::UpdateGameObject(obj_gem);  
@@ -498,8 +554,3 @@ void FloatDirectionObject(GameObject& obj, float speed)
 	obj.velocity.y = -y * speed;
 }
 
-
-void test()
-{
-	
-}
