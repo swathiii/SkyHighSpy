@@ -22,6 +22,7 @@ enum AgentState
 	STATE_PLAY, 
 	STATE_DEAD,
 	STATE_WIN, 
+	STATE_LAND,
 };
 
 struct GameState
@@ -46,9 +47,9 @@ GameState gamestate;
 enum GameObjectTyoe
 {
 	TYPE_AGENT = 0,
-	TYPE_GEM = 1,
-	TYPE_METEOR = 2,
-	TYPE_ASTEROID = 3,
+	TYPE_GEM,
+	TYPE_METEOR,
+	TYPE_ASTEROID,
 	TYPE_RING, 
 	TYPE_PIECES,
 	TYPE_PARTICLES,
@@ -79,11 +80,12 @@ void MainGameEntry(PLAY_IGNORE_COMMAND_LINE) //no need to use command line args 
 	//setting up playbuffer
 	Play::CreateManager(DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_SCALE);
 	Play::LoadBackground("Data\\Backgrounds\\background.png"); 
+	Play::StartAudioLoop("music");
 
 	//creating agent and gem object
 	Play::CreateGameObject(TYPE_AGENT, { DISPLAY_WIDTH / 2,DISPLAY_HEIGHT / 2 }, 10, "agent8_fly");
-	//GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT); 
-	//obj_agent.rotation += Play::DegToRad(180); 
+/*	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT); 
+	obj_agent.rotation += Play::DegToRad(180);  */  
 
 	Play::MoveSpriteOrigin("agent8_fly", 64, 108);
 	Play::MoveSpriteOrigin("agent8_left_7", 64, 108);
@@ -240,6 +242,7 @@ void UpdateControls()
 void UpdateAgent( )
 {
 	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT);
+
 	//obj_agent.rotation += Play::DegToRad(180);   
 	
 
@@ -288,6 +291,7 @@ void UpdateAgent( )
 		Play::SetSprite(obj_agent, "agent8_dead_2", 0.05f); 
 	} 
 
+
 	Play::UpdateGameObject(obj_agent);
 	Play::DrawObjectRotated(obj_agent);
 
@@ -310,6 +314,8 @@ void UpdateGem()
 
 void UpdateAsteroid()
 {
+	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT);   
+
 	for (int i : Play::CollectGameObjectIDsByType(TYPE_ASTEROID))
 	{
 
@@ -350,6 +356,7 @@ void UpdateAsteroid()
 		case STATE_WIN:
 			Play::DestroyGameObject(i);
 			break;
+
 		}
 
 
@@ -408,6 +415,7 @@ void UpdateMeteor()
 void Collision()
 {
 	bool liftoff = false;
+
 	//agent - asteroid collision
 	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT);
 	   
@@ -419,16 +427,18 @@ void Collision()
 		{
 			
 			obj_agent.pos = obj_asteroid.pos; //update agent's position
-			//obj_agent.rotation += Play::DegToRad(180);  
+			//obj_agent.rotation = obj_agent.rotation + Play::DegToRad(180);  
 
 			gamestate.collision += 1;
 
 			Play::SetSprite(obj_agent, "agent8_left_7", 0.01);
+
 			UpdateControls(); 
 
 
 			if (Play::KeyDown(VK_SPACE))
 			{
+				Play::PlayAudio("laser");
 				gamestate.lift_off += 1;
 				liftoff = true;
 
@@ -471,7 +481,7 @@ void gemcollision()
 		if (gemcollision)
 		{
 			//Play::SetSprite(obj_agent, "blue_ring", 0.01); 
-
+			Play::PlayAudio("reward"); 
 			Play::DestroyGameObject(j);  
 			//gamestate.gemsleft -= 1; 
 
@@ -495,6 +505,8 @@ void meteorcollision()
 		 
 		if (Play::IsColliding(obj_agent, obj_meteor))
 		{	
+			Play::PlayAudio("combust"); 
+
 			obj_agent.pos = obj_meteor.pos; 
 
 			Play::SetSprite(obj_meteor, "agent8_dead_2", 0.05f); 
@@ -505,7 +517,9 @@ void meteorcollision()
 
 			gamestate.deaths += 1; 
 			gamestate.agent_dead = true;  
-			 
+			
+			Play::StopAudioLoop("music");     
+			   
 			Play::DestroyGameObject(m);     
 		}
 	}
