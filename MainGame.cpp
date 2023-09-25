@@ -234,7 +234,18 @@ void UpdateControls()
 		obj_agent.pos = Vector2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2);
 		obj_agent.velocity = AGENT_VELOCITY_DEFAULT;
 	}
-	
+
+	std::vector<int> vAsteroids = Play::CollectGameObjectIDsByType(TYPE_ASTEROID);
+	for (int id_asteroid : vAsteroids)
+	{
+		GameObject& obj_asteroid = Play::GetGameObject(id_asteroid);
+		if (Play::IsColliding(obj_agent, obj_asteroid))
+		{
+			obj_agent.rotation += Play::DegToRad(180); 
+			Play::SetSprite(obj_agent, "agent8_left", 0.05f);
+			
+		}
+	}
 	//Play::DrawSpriteCircle(obj_agent.pos, 10, "agent8_fly", Play::cBlue);  
 	Play::UpdateGameObject(obj_agent);
 }
@@ -444,10 +455,10 @@ void Collision()
 
 				int gem_id = Play::CreateGameObject(TYPE_GEM, obj_asteroid.pos, AGENT_RADIUS, "gem");
 				GameObject& obj_gem = Play::GetGameObject(gem_id);
-				obj_gem.pos = obj_asteroid.pos;
+				obj_gem.pos = obj_asteroid.pos;  
 				gamestate.gemcreated += 1;
 
-				obj_agent.pos += obj_agent.velocity * 30; 
+				obj_agent.pos -= obj_agent.velocity * 40; 
 
 				Play::DestroyGameObject(i);
 			
