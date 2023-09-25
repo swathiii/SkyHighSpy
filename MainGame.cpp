@@ -214,12 +214,13 @@ void UpdateControls()
 	if (Play::KeyDown(VK_LEFT))
 	{
 		obj_agent.rotation -= 0.1f;
-		Play::SetSprite(obj_agent, "agent8_left", 0.1f);
+		Play::SetSprite(obj_agent, "agent8_left_7", 0.1f);
+
 	}
 	if (Play::KeyDown(VK_RIGHT))
 	{  
 		obj_agent.rotation += 0.1f;     
-		Play::SetSprite(obj_agent, "agent8_right", 0.1f);      
+		Play::SetSprite(obj_agent, "agent8_right_7", 0.1f);      
 	}
 	if (Play::KeyDown(VK_UP))
 	{
@@ -242,8 +243,17 @@ void UpdateControls()
 		if (Play::IsColliding(obj_agent, obj_asteroid))
 		{
 			obj_agent.rotation += Play::DegToRad(180); 
-			Play::SetSprite(obj_agent, "agent8_left", 0.05f);
+			Play::SetSprite(obj_agent, "agent8_left", 0.f);
 			
+		}
+		if (Play::KeyDown(VK_LEFT))  
+		{
+			Play::SetSprite(obj_agent, "agent8_left_7", 0.1f);
+
+		}
+		if (Play::KeyDown(VK_RIGHT))  
+		{
+			Play::SetSprite(obj_agent, "agent8_right_7", 0.1f); 
 		}
 	}
 	//Play::DrawSpriteCircle(obj_agent.pos, 10, "agent8_fly", Play::cBlue);  
