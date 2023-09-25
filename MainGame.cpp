@@ -35,8 +35,6 @@ struct GameState
 	bool agent_dead = false; 
 	bool agent_won = false; 
 	float asteroid_rotation = 0;
-	float lift_off = 0;
-	int gemcreated = 0;
 	int gemsleft = objectcount - 1 ;  
 	Point2f GemPos{ -100, -100 };
 	AgentState agentstate = STATE_APPEAR; 
@@ -72,8 +70,6 @@ void FloatDirectionObject(GameObject& obj, float speed);
 void WrapObject(GameObject& obj);
 float Randomize(int range, float multiplier);
 
-void UpdateAgent(); 
-
 
 void MainGameEntry(PLAY_IGNORE_COMMAND_LINE) //no need to use command line args for more playbuffer programs
 {
@@ -84,9 +80,6 @@ void MainGameEntry(PLAY_IGNORE_COMMAND_LINE) //no need to use command line args 
 
 	//creating agent and gem object
 	Play::CreateGameObject(TYPE_AGENT, { DISPLAY_WIDTH / 2,DISPLAY_HEIGHT / 2 }, 10, "agent8_fly");
-/*	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT); 
-	obj_agent.rotation += Play::DegToRad(180);  */  
-
 	Play::MoveSpriteOrigin("agent8_fly", 64, 108);
 	Play::MoveSpriteOrigin("agent8_left_7", 64, 108);
 	Play::MoveSpriteOrigin("agent8_right_7", 64, 108);
@@ -117,7 +110,6 @@ void MainGameEntry(PLAY_IGNORE_COMMAND_LINE) //no need to use command line args 
 		int ast_id = Play::CreateGameObject(TYPE_ASTEROID, { Play::RandomRollRange(0, 1280), Play::RandomRollRange(0, 720) }, AGENT_RADIUS, "asteroid_2"); //random pos  v 
 		Play::CentreSpriteOrigin("asteroid_2");
 		GameObject& asteroid_obj = Play::GetGameObject(ast_id);
-		//WrapObject(asteroid_obj); 
 		asteroid_obj.rotation = Randomize(628, 0.01);
 
 
@@ -142,7 +134,6 @@ bool MainGameUpdate(float elapsedTime)
 	meteorcollision(); 
 
 	Draw();
-
 	
 	return Play::KeyDown(VK_ESCAPE);
 }
@@ -193,11 +184,6 @@ void Draw()
 	Play::DrawFontText("64px", "LEFT AND RIGHT ARROW KEYS TO ROTATE AND SPACE TO LAUNCH", { DISPLAY_WIDTH / 2, DISPLAY_HEIGHT - 80 }, Play::CENTRE); 
 
 	Play::DrawFontText("64px", "Gems Remaining: " + std::to_string(gamestate.gemsleft), Point2D(200 , 50), Play::CENTRE);   
- 
-	/*Play::DrawFontText("64px", "Deaths: " + std::to_string(gamestate.deaths), Point2D(50, 400), Play::LEFT);
-	Play::DrawFontText("64px", "Asteroid Rotation: " + std::to_string(gamestate.asteroid_rotation), Point2D(50, 350), Play::LEFT);
-	Play::DrawFontText("64px", "Lift Off: " + std::to_string(gamestate.lift_off), Point2D(50, 300), Play::LEFT);*/
-	//Play::DrawFontText("64px", "Gems Created: " + std::to_string(gamestate.gemcreated), Point2D( 200 , 150), Play::CENTRE);
 
 	Play::PresentDrawingBuffer();
 
@@ -256,16 +242,12 @@ void UpdateControls()
 			Play::SetSprite(obj_agent, "agent8_right_7", 0.1f); 
 		}
 	}
-	//Play::DrawSpriteCircle(obj_agent.pos, 10, "agent8_fly", Play::cBlue);  
 	Play::UpdateGameObject(obj_agent);
 }
 
 void UpdateAgent( )
 {
 	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT);
-
-	//obj_agent.rotation += Play::DegToRad(180);   
-	
 
 	switch (gamestate.agentstate)
 	{
@@ -435,8 +417,6 @@ void UpdateMeteor()
 
 void Collision()
 {
-	bool liftoff = false;
-
 	//agent - asteroid collision
 	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT);
 	   
@@ -448,7 +428,6 @@ void Collision()
 		{
 			
 			obj_agent.pos = obj_asteroid.pos; //update agent's position
-			//obj_agent.rotation = obj_agent.rotation + Play::DegToRad(180);  
 
 			gamestate.collision += 1;
 
@@ -460,13 +439,10 @@ void Collision()
 			if (Play::KeyDown(VK_SPACE))
 			{
 				Play::PlayAudio("laser");
-				gamestate.lift_off += 1;
-				liftoff = true;
 
 				int gem_id = Play::CreateGameObject(TYPE_GEM, obj_asteroid.pos, AGENT_RADIUS, "gem");
 				GameObject& obj_gem = Play::GetGameObject(gem_id);
 				obj_gem.pos = obj_asteroid.pos;  
-				gamestate.gemcreated += 1;
 
 				obj_agent.pos -= obj_agent.velocity * 40; 
 
@@ -486,7 +462,6 @@ void gemcollision()
 	GameObject& obj_agent = Play::GetGameObjectByType(TYPE_AGENT);
 	for (int j : Play::CollectGameObjectIDsByType(TYPE_GEM))
 	{
-		//gamestate.gemsleft = gamestate.objectcount - 1; 
 		GameObject& obj_gem = Play::GetGameObject(j);
 		bool gemcollision = false; 
 		if (Play::IsColliding(obj_gem, obj_agent))
@@ -504,7 +479,6 @@ void gemcollision()
 			//Play::SetSprite(obj_agent, "blue_ring", 0.01); 
 			Play::PlayAudio("reward"); 
 			Play::DestroyGameObject(j);  
-			//gamestate.gemsleft -= 1; 
 
 			if (gamestate.gemsleft < 1)
 			{
@@ -522,7 +496,6 @@ void meteorcollision()
 	for (int m : Play::CollectGameObjectIDsByType(TYPE_METEOR))
 	{
 		GameObject& obj_meteor = Play::GetGameObject(m); 
-		//bool agent_meteor_collision = false;   
 		 
 		if (Play::IsColliding(obj_agent, obj_meteor))
 		{	
@@ -589,9 +562,4 @@ void FloatDirectionObject(GameObject& obj, float speed)
 
 	obj.velocity.x = x * speed;
 	obj.velocity.y = -y * speed;
-}
-
-void test()
-{
-	//commit to see if the file has been renamed
 }
