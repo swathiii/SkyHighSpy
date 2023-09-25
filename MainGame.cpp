@@ -570,3 +570,7 @@ void FloatDirectionObject(GameObject& obj, float speed)
 	obj.velocity.y = -y * speed;
 }
 
+void test()
+{
+	//commit to see if the file has been renamed
+}
