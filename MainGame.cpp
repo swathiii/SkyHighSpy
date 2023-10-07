@@ -76,7 +76,7 @@ void MainGameEntry(PLAY_IGNORE_COMMAND_LINE) //no need to use command line args 
 	//setting up playbuffer
 	Play::CreateManager(DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_SCALE);
 	Play::LoadBackground("Data\\Backgrounds\\background.png"); 
-	Play::StartAudioLoop("music");
+	//Play::StartAudioLoop("music");
 
 	//creating agent and gem object
 	Play::CreateGameObject(TYPE_AGENT, { DISPLAY_WIDTH / 2,DISPLAY_HEIGHT / 2 }, 10, "agent8_fly");
