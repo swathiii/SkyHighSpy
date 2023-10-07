@@ -2,7 +2,4 @@
 
 ![](/.github/images/SkyHighSpy.gif)
 
-
-This project is part of the C++ taster tutorial aimed at A-Level students. It provides a number of different functions which can be edited to change the behaviour of an existing game. The tutorial is largely based around using trigonometry to make things move forward in the direction they are facing.
-
-[![](/.github/images/download.png)](https://github.com/sumo-digital-academy/playbuffer/archive/refs/heads/SkyHighSpy.zip)
+SkyHighSpy is a game developed during my internship at Sumo Digital. It 's an exciting and engaging game that demonstrates mathematical concepts, primarily trigonometry to achieve precise and realistic movements. SkyHighSpy has been an incredible learning experience, showcasing how mathematics and physics can be integrated into game development. 
